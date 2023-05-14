@@ -1,3 +1,4 @@
+# Conexão com os providers
 terraform {
     required_providers {
         azurerm = {
@@ -11,6 +12,7 @@ provider "azurerm" {
   features {}
 }
 
+# Criação de grupo de recursos
 resource "azurerm_resource_group" "default" {
     name = var.rg
     location = var.locat
@@ -21,6 +23,7 @@ resource "azurerm_resource_group" "default" {
 }
 
 
+# Criação de rede virtual
 resource "azurerm_virtual_network" "default" {
     name = "vnet-devops"
     address_space = ["10.0.0.0/16"]
@@ -32,6 +35,7 @@ resource "azurerm_virtual_network" "default" {
         }
 }
 
+# Criação de sub-rede interna
 resource "azurerm_subnet" "internal" {
     name = "internal"
     resource_group_name = azurerm_resource_group.default.name
@@ -39,6 +43,7 @@ resource "azurerm_subnet" "internal" {
     address_prefixes = ["10.0.1.0/24"]
 }
 
+# Criação de sub-rede staging
 resource "azurerm_subnet" "staging" {
     name = "staging"
     resource_group_name = azurerm_resource_group.default.name
@@ -47,6 +52,7 @@ resource "azurerm_subnet" "staging" {
     
 }
 
+# Configuração de ip público para a máquina
 resource "azurerm_public_ip" "default" {
   name                = "${var.vm}-pi"
   resource_group_name = var.rg
@@ -54,6 +60,7 @@ resource "azurerm_public_ip" "default" {
   allocation_method   = "Static"
 }
 
+# Alteração no grupo de segurança
 resource "azurerm_network_security_group" "default" {
   name                = "${var.vm}-nsg"
   location            = var.locat
@@ -72,6 +79,7 @@ resource "azurerm_network_security_group" "default" {
   }
 }
 
+# Atribuição de ip para a máquina virtual
 resource "azurerm_network_interface" "default" {
   name                = "${var.vm}-nic"
   location            = var.locat
@@ -85,11 +93,15 @@ resource "azurerm_network_interface" "default" {
   }
 }
 
+
+# Atribuição da interface de segurança para a máquina virtual
+
 resource "azurerm_network_interface_security_group_association" "default" {
   network_interface_id      = azurerm_network_interface.default.id
   network_security_group_id = azurerm_network_security_group.default.id
 }
 
+# Criação da máquina virtual
 resource "azurerm_virtual_machine" "default" {
     
   name                  = var.vm
