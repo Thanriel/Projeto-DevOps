@@ -1,0 +1,43 @@
+---
+- name: Instalação do Docker
+  hosts: all
+  remote_user: useraz
+  become: yes
+  tasks:  
+    - name: Instalar módulos
+      ansible.builtin.apt:
+        pkg:
+        - ca-certificates
+        - curl
+        - gnupg
+        - python3-apt
+        - python3-pip
+        - aptitude
+        - lsb-release
+    
+    - name: Adicionando a chave para o repositório APT 
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Adicionando o repositório para instalar o Docker
+      ansible.builtin.apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+    
+    - name: Instalar Docker
+      ansible.builtin.apt:
+        pkg:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+        update-cache: yes
+        
+- name: Executar container da aplicação
+  hosts: all
+  remote_user: useraz 
+  tasks:
+      - name: Executar criação
+        ansible.builtin.command: docker run -d -p 8080:8080 thanriel/nginx-teste:0.0.1
